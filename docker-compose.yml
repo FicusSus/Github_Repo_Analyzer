@@ -1,0 +1,45 @@
+name: github-repo-analyzer
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-analyzer}
+      POSTGRES_USER: ${POSTGRES_USER:-analyzer}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.example)}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-analyzer}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-analyzer}
+      # Optional. Without it the server uses GitHub's anonymous limit (60 requests/hour).
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GITHUB_API_URL: ${GITHUB_API_URL:-https://api.github.com}
+      COMMIT_WINDOW_DAYS: ${COMMIT_WINDOW_DAYS:-365}
+      COMMITS_MAX_PAGES: ${COMMITS_MAX_PAGES:-5}
+      ANALYSIS_CACHE_TTL_SECONDS: ${ANALYSIS_CACHE_TTL_SECONDS:-600}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "${APP_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:

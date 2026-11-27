@@ -1,0 +1,31 @@
+{
+  "name": "github-repo-analyzer-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "type-check": "vue-tsc -b",
+    "test": "vitest run",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "chart.js": "^4.6.2",
+    "vue": "^3.5.46",
+    "vue-chartjs": "^5.3.7",
+    "vue-router": "^5.5.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@vitejs/plugin-vue": "^6.0.11",
+    "@vue/tsconfig": "^0.9.1",
+    "typescript": "~6.0.3",
+    "vite": "^8.4.0",
+    "vitest": "^5.1.2",
+    "vue-tsc": "^3.3.14"
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}
